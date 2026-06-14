@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "Front/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/$", "dest": "/Front/login/login.html" },
+    { "src": "/(.*)", "dest": "/Front/$1" }
+  ]
+}
