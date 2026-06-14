@@ -121,7 +121,7 @@ function validarLogin() {
     return;
   }
 
-  fetch("http://localhost:8080/auth/login", {
+    fetch("https://portal-sale.onrender.com/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ra, senha })
@@ -377,7 +377,7 @@ function renderizarCalendario(eventos) {
 function carregarCalendarioEventos() {
   if (!calendarGrid || !calendarMonthYear) return;
 
-  fetch('http://localhost:8080/eventos')
+    fetch('https://portal-sale.onrender.com/eventos')
     .then(async res => {
       if (!res.ok) {
         const text = await res.text().catch(() => '');
@@ -408,7 +408,7 @@ function redirecionarParaMarcarEventos() {
 function atualizarEstatisticas() {
   const numeroEventosElement = document.querySelector(".stat-item__number");
 
-  fetch("http://localhost:8080/eventos")
+    fetch("https://portal-sale.onrender.com/eventos")
     .then(res => res.json())
     .then(eventos => {
       numeroEventosElement.textContent = eventos.length;
@@ -444,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Se há um token, valida no servidor antes de conceder acesso
   if (token) {
-    fetch("http://localhost:8080/auth/validate", {
+      fetch("https://portal-sale.onrender.com/auth/validate", {
       method: "GET",
       headers: { 
         "Authorization": `Bearer ${token}`,

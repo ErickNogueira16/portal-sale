@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function carregarEventos() {
-  fetch("http://localhost:8080/eventos", {
+  fetch("https://portal-sale.onrender.com/eventos", {
     headers: getAuthHeaders()
   })
     .then(res => res.json())
@@ -257,7 +257,7 @@ function carregarEventos() {
 }
 
 function mostrarDetalhes(id) {
-  fetch(`http://localhost:8080/eventos/${id}`, {
+  fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
     headers: getAuthHeaders()
   })
     .then(res => res.json())
@@ -285,7 +285,7 @@ function mostrarDetalhes(id) {
 }
 
 function editarEvento(id) {
-  fetch(`http://localhost:8080/eventos/${id}`, {
+  fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
     headers: getAuthHeaders()
   })
     .then(res => res.json())
@@ -340,7 +340,7 @@ function editarEvento(id) {
           tipoEvento: document.getElementById("editTipoEvento").value
         };
 
-        fetch(`http://localhost:8080/eventos/${id}`, {
+        fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
           method: "PUT",
           headers: getAuthHeaders(),
           body: JSON.stringify(objAtualizado)
@@ -366,7 +366,7 @@ function editarEvento(id) {
 }
 
 function verInscritos(eventoId) {
-  fetch(`http://localhost:8080/eventos/${eventoId}/inscritos`, {
+  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}/inscritos`, {
     headers: getAuthHeaders()
   })
     .then(res => res.json())
@@ -392,7 +392,7 @@ function verInscritos(eventoId) {
 function excluirEvento(id) {
   if (!confirm("Tem certeza que deseja excluir este evento?")) return;
 
-  fetch(`http://localhost:8080/eventos/${id}`, {
+  fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
     method: "DELETE",
     headers: getAuthHeaders()
   })

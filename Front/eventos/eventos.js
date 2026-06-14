@@ -209,7 +209,7 @@ async function solicitarCodigoCheckin(eventoId) {
   if (!token) {
     throw new Error("Você precisa estar logado para usar a presença.");
   }
-  const response = await fetch(`http://localhost:8080/presenca/checkin/solicitar-codigo/${eventoId}`, {
+  const response = await fetch(`https://portal-sale.onrender.com/presenca/checkin/solicitar-codigo/${eventoId}`, {
     method: "POST",
     headers: getAuthHeaders()
   });
@@ -340,7 +340,7 @@ function mostrarModalCodigo(codigo) {
 }
 
 async function validarCheckin(eventoId, codigo, latitude, longitude) {
-  const response = await fetch("http://localhost:8080/presenca/checkin/validar", {
+  const response = await fetch("https://portal-sale.onrender.com/presenca/checkin/validar", {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ eventoId, codigo, latitude, longitude })
@@ -484,7 +484,7 @@ botaoFavorito.addEventListener("click", () => {
 function carregarEventos(filtro = "all") {
   if (redirectIfNotAuthenticated()) return;
 
-  fetch("http://localhost:8080/eventos", {
+  fetch("https://portal-sale.onrender.com/eventos", {
     headers: getAuthHeaders()
   })
     .then((response) => {
@@ -558,7 +558,7 @@ function inscreverEvento(eventoId, botao) {
   botao.disabled = true;
   botao.innerHTML = '<span class="button-text">Processando...</span>';
 
-  fetch(`http://localhost:8080/eventos/${eventoId}/inscricao`, {
+  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}/inscricao`, {
     method: "POST",
     headers: getAuthHeaders()
   })
@@ -593,7 +593,7 @@ function inscreverEvento(eventoId, botao) {
  */
 function excluirEvento(eventoId) {
   if (confirm("Tem certeza que deseja excluir este evento?")) {
-    fetch(`http://localhost:8080/eventos/${eventoId}`, {
+    fetch(`https://portal-sale.onrender.com/eventos/${eventoId}`, {
       method: "DELETE",
       headers: getAuthHeaders(),
     })
@@ -650,7 +650,7 @@ function verificarStatusInscricao(eventoId, botao, vagasRestantes, dataHora) {
     return;
   }
 
-  fetch(`http://localhost:8080/eventos/${eventoId}/inscricao/status`, {
+  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}/inscricao/status`, {
     headers: getAuthHeaders()
   })
     .then(response => response.json())
@@ -677,7 +677,7 @@ function verificarStatusInscricao(eventoId, botao, vagasRestantes, dataHora) {
 function verificarPresencaConfirmada(eventoId, card, presencaButton, status) {
   if (!getAuthToken()) return;
 
-  fetch(`http://localhost:8080/eventos/${eventoId}/presenca/status`, {
+  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}/presenca/status`, {
     headers: getAuthHeaders()
   })
     .then(async response => {

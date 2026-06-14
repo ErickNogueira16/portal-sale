@@ -218,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Dados enviados:", evento);
 
-    fetch("http://localhost:8080/eventos", {
+    fetch("https://portal-sale.onrender.com/eventos", {
       method: "POST",
       headers: {
         "Accept": "application/json",

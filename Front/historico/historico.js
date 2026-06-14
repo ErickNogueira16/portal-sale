@@ -85,7 +85,7 @@ function carregarHistorico() {
     return;
   }
 
-  fetch("http://localhost:8080/eventos/inscricoes/me", {
+  fetch("https://portal-sale.onrender.com/eventos/inscricoes/me", {
     headers: getAuthHeaders()
   })
     .then(async response => {

@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log("Cadastro feito:", evento);
 
-        fetch("http://localhost:8080/auth/cadastro", {
+        fetch("https://portal-sale.onrender.com/auth/cadastro", {
             method: "POST",
             headers: {
                 "Accept": "application/json",
