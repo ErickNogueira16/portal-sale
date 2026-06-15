@@ -9,17 +9,22 @@ import com.example.PortalSale.repository.InscricaoEventoRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import com.example.PortalSale.repository.PresencaEventoRepository;
 
 @Service
 public class EventoService {
 
     private final EventoRepository eventoRepository;
     private final InscricaoEventoRepository inscricaoEventoRepository;
+    private final PresencaEventoRepository presencaEventoRepository;
 
     public EventoService(EventoRepository eventoRepository,
-                         InscricaoEventoRepository inscricaoEventoRepository) {
+                        InscricaoEventoRepository inscricaoEventoRepository,
+                        PresencaEventoRepository presencaEventoRepository) {
+
         this.eventoRepository = eventoRepository;
         this.inscricaoEventoRepository = inscricaoEventoRepository;
+        this.presencaEventoRepository = presencaEventoRepository;
     }
 
     public List<Evento> listarEventos() {
@@ -38,6 +43,18 @@ public class EventoService {
     }
 
     public void excluirEvento(long id) {
+
+        List<InscricaoEvento> inscricoes =
+                inscricaoEventoRepository.findByEventoId(id);
+
+        for (InscricaoEvento inscricao : inscricoes) {
+            presencaEventoRepository
+                    .findByInscricaoEventoId(inscricao.getId())
+                    .ifPresent(presencaEventoRepository::delete);
+        }
+
+        inscricaoEventoRepository.deleteAll(inscricoes);
+
         eventoRepository.deleteById(id);
     }
 

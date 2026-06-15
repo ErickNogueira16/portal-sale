@@ -9,9 +9,16 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InscricaoEventoRepository extends JpaRepository<InscricaoEvento, Long> {
+
     boolean existsByUsuarioIdAndEventoIdAndStatus(Long usuarioId, Long eventoId, StatusInscricao status);
+
     long countByEventoIdAndStatus(Long eventoId, StatusInscricao status);
+
     Optional<InscricaoEvento> findByUsuarioIdAndEventoIdAndStatus(Long usuarioId, Long eventoId, StatusInscricao status);
+
     List<InscricaoEvento> findByEventoIdAndStatus(Long eventoId, StatusInscricao status);
+
     List<InscricaoEvento> findByUsuarioIdAndStatus(Long usuarioId, StatusInscricao status);
+
+    List<InscricaoEvento> findByEventoId(Long eventoId);
 }
