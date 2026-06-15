@@ -140,7 +140,7 @@ function validarLogin() {
       saveAuthData(usuario.token, usuario.role);
 
       if (usuario.role === "ADMIN") {
-        window.location.href = "../admin/admin.html";
+        window.location.href = "../Admin/admin.html";
       } else {
         mostrarPainelPrincipal();
         carregarCalendarioEventos();
@@ -460,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(data => {
       // Token válido
       if (role === "ADMIN") {
-        window.location.href = "../admin/admin.html";
+        window.location.href = "../Admin/admin.html";
         return;
       }
       // Mostra o painel principal com o calendário e estatísticas
