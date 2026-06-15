@@ -18,7 +18,7 @@ function saveAuthToken(token) {
     console.warn("Não foi possível salvar token em window.name", error);
   }
 }
-
+ 
 function getAuthToken() {
   const urlParams = new URLSearchParams(window.location.search);
   const tokenFromUrl = urlParams.get("token");
