@@ -1,10 +1,10 @@
 package com.example.PortalSale.controllers;
 
+import com.example.PortalSale.dto.InscritoDto;
 import com.example.PortalSale.dto.ValidacaoCodigoRequest;
 import com.example.PortalSale.models.Evento;
 import com.example.PortalSale.models.InscricaoEvento;
 import com.example.PortalSale.models.PresencaEvento;
-import com.example.PortalSale.models.Usuario;
 import com.example.PortalSale.security.ApplicationUserDetails;
 import com.example.PortalSale.services.EventoService;
 import com.example.PortalSale.services.InscricaoService;
@@ -12,6 +12,8 @@ import com.example.PortalSale.services.PresencaService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -104,6 +106,28 @@ public class EventoController {
     @GetMapping("/{id}/vagas-disponiveis")
     public ResponseEntity<Integer> vagasDisponiveis(@PathVariable Long id) {
         return ResponseEntity.ok(eventoService.vagasDisponiveis(id));
+    }
+
+    @GetMapping("/{id}/inscritos")
+    public ResponseEntity<List<InscritoDto>> listarInscritos(@PathVariable Long id) {
+        List<InscricaoEvento> inscricoes = inscricaoService.buscarInscritosPorEvento(id);
+        List<PresencaEvento> presencas = presencaService.listarPresencas(id);
+        Set<Long> presencaInscricaoIds = presencas.stream()
+                .map(p -> p.getInscricaoEvento().getId())
+                .collect(Collectors.toSet());
+
+        List<InscritoDto> inscritosDto = inscricoes.stream()
+                .map(inscricao -> new InscritoDto(
+                        inscricao.getId(),
+                        inscricao.getUsuario().getId(),
+                        inscricao.getUsuario().getNome(),
+                        inscricao.getUsuario().getRa(),
+                        presencaInscricaoIds.contains(inscricao.getId()),
+                        inscricao.getEvento().getNome(),
+                        inscricao.getDataHoraInscricao()
+                ))
+                .toList();
+        return ResponseEntity.ok(inscritosDto);
     }
 
     @GetMapping("/inscricoes/me")

@@ -21,4 +21,6 @@ public interface InscricaoEventoRepository extends JpaRepository<InscricaoEvento
     List<InscricaoEvento> findByUsuarioIdAndStatus(Long usuarioId, StatusInscricao status);
 
     List<InscricaoEvento> findByEventoId(Long eventoId);
+
+    void deleteAllByEventoId(Long eventoId);
 }

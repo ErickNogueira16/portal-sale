@@ -1,5 +1,6 @@
 package com.example.PortalSale.services;
 
+import com.example.PortalSale.dto.InscritoDto;
 import com.example.PortalSale.models.Evento;
 import com.example.PortalSale.models.InscricaoEvento;
 import com.example.PortalSale.models.StatusInscricao;
@@ -8,6 +9,9 @@ import com.example.PortalSale.repository.EventoRepository;
 import com.example.PortalSale.repository.InscricaoEventoRepository;
 import com.example.PortalSale.repository.UsuarioRepository;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,5 +74,9 @@ public class InscricaoService {
                 .stream()
                 .map(InscricaoEvento::getEvento)
                 .toList();
+    }
+
+    public java.util.List<InscricaoEvento> buscarInscritosPorEvento(Long eventoId) {
+        return inscricaoEventoRepository.findByEventoIdAndStatus(eventoId, StatusInscricao.INSCRITO);
     }
 }

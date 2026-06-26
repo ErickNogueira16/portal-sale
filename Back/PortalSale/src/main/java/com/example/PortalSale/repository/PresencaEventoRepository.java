@@ -18,4 +18,6 @@ public interface PresencaEventoRepository extends JpaRepository<PresencaEvento, 
     Optional<PresencaEvento> findByInscricaoEventoId(Long inscricaoEventoId);
 
     List<PresencaEvento> findByInscricaoEvento_EventoId(Long eventoId);
+
+    void deleteAllByInscricaoEvento_EventoId(Long eventoId);
 }

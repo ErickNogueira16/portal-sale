@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface CodigoValidacaoRepository extends JpaRepository<CodigoValidacao, Long> {
     Optional<CodigoValidacao> findFirstByUsuarioIdAndEventoIdAndTipoAndUsadoFalseOrderByCriadoEmDesc(
             Long usuarioId, Long eventoId, TipoValidacao tipo);
+
+    void deleteAllByEventoId(Long eventoId);
 }

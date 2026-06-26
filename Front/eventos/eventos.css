@@ -94,6 +94,18 @@ body {
     margin-bottom: 30px;
 }
 
+.events-empty-message {
+    grid-column: 1 / -1;
+    background: #eff6ff;
+    border: 2px dashed #1e40af;
+    padding: 40px 30px;
+    text-align: center;
+    border-radius: 16px;
+    color: #1e3a8a;
+    font-size: 18px;
+    font-weight: 600;
+}
+
 /* Card de Evento */
 .event-card {
     background: white;

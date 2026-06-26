@@ -4,12 +4,15 @@ import com.example.PortalSale.models.Evento;
 import com.example.PortalSale.models.InscricaoEvento;
 import com.example.PortalSale.models.StatusInscricao;
 import com.example.PortalSale.models.Usuario;
+import com.example.PortalSale.repository.CodigoValidacaoRepository;
 import com.example.PortalSale.repository.EventoRepository;
 import com.example.PortalSale.repository.InscricaoEventoRepository;
+import com.example.PortalSale.repository.PresencaEventoRepository;
+import com.example.PortalSale.repository.PresencaTokenRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import com.example.PortalSale.repository.PresencaEventoRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EventoService {
@@ -17,14 +20,20 @@ public class EventoService {
     private final EventoRepository eventoRepository;
     private final InscricaoEventoRepository inscricaoEventoRepository;
     private final PresencaEventoRepository presencaEventoRepository;
+    private final CodigoValidacaoRepository codigoValidacaoRepository;
+    private final PresencaTokenRepository presencaTokenRepository;
 
     public EventoService(EventoRepository eventoRepository,
                         InscricaoEventoRepository inscricaoEventoRepository,
-                        PresencaEventoRepository presencaEventoRepository) {
+                        PresencaEventoRepository presencaEventoRepository,
+                        CodigoValidacaoRepository codigoValidacaoRepository,
+                        PresencaTokenRepository presencaTokenRepository) {
 
         this.eventoRepository = eventoRepository;
         this.inscricaoEventoRepository = inscricaoEventoRepository;
         this.presencaEventoRepository = presencaEventoRepository;
+        this.codigoValidacaoRepository = codigoValidacaoRepository;
+        this.presencaTokenRepository = presencaTokenRepository;
     }
 
     public List<Evento> listarEventos() {
@@ -42,19 +51,12 @@ public class EventoService {
         return eventoRepository.save(evento);
     }
 
+    @Transactional
     public void excluirEvento(long id) {
-
-        List<InscricaoEvento> inscricoes =
-                inscricaoEventoRepository.findByEventoId(id);
-
-        for (InscricaoEvento inscricao : inscricoes) {
-            presencaEventoRepository
-                    .findByInscricaoEventoId(inscricao.getId())
-                    .ifPresent(presencaEventoRepository::delete);
-        }
-
-        inscricaoEventoRepository.deleteAll(inscricoes);
-
+        presencaEventoRepository.deleteAllByInscricaoEvento_EventoId(id);
+        inscricaoEventoRepository.deleteAllByEventoId(id);
+        codigoValidacaoRepository.deleteAllByEventoId(id);
+        presencaTokenRepository.deleteAllByEventoId(id);
         eventoRepository.deleteById(id);
     }
 

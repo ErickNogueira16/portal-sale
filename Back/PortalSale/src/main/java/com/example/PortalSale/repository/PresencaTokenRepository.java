@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface PresencaTokenRepository extends JpaRepository<PresencaToken, Long> {
 
     Optional<PresencaToken> findByTokenAndEventoId(String token, Long eventoId);
+
+    void deleteAllByEventoId(Long eventoId);
 }

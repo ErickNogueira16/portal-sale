@@ -41,7 +41,10 @@ function getAuthToken() {
   try {
     const nameData = JSON.parse(window.name || "{}");
     if (nameData?.token) {
-      saveAuthToken(nameData.token);
+      saveAuthToken(
+        nameData.token,
+        nameData.role || localStorage.getItem("role") || sessionStorage.getItem("role") || "USER"
+      );
       return nameData.token;
     }
   } catch (error) {
@@ -51,10 +54,34 @@ function getAuthToken() {
   return null;
 }
 
+function getAuthRole() {
+  const roleFromLocalStorage = localStorage.getItem("role");
+  if (roleFromLocalStorage) return roleFromLocalStorage;
+
+  const roleFromSession = sessionStorage.getItem("role");
+  if (roleFromSession) {
+    localStorage.setItem("role", roleFromSession);
+    return roleFromSession;
+  }
+
+  try {
+    const nameData = JSON.parse(window.name || "{}");
+    if (nameData?.role) {
+      sessionStorage.setItem("role", nameData.role);
+      localStorage.setItem("role", nameData.role);
+      return nameData.role;
+    }
+  } catch (error) {
+    console.warn("window.name não contém role válido", error);
+  }
+  return null;
+}
+
 function clearAuthToken() {
   localStorage.removeItem("token");
   localStorage.removeItem("role");
   sessionStorage.removeItem("token");
+  sessionStorage.removeItem("role");
   try {
     window.name = "";
   } catch (error) {
@@ -199,6 +226,102 @@ function mostrarModalMensagem(msg, tipo = "info") {
     modal.appendChild(iconoDiv);
     modal.appendChild(mensagem);
     modal.appendChild(botao);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  });
+}
+
+function mostrarModalConfirmacao(msg = "Tem certeza?") {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      font-family: Arial, sans-serif;
+    `;
+
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      position: relative;
+      z-index: 10001;
+    `;
+
+    const mensagem = document.createElement('p');
+    mensagem.textContent = msg;
+    mensagem.style.cssText = `
+      color: #333;
+      font-size: 16px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    `;
+
+    const buttonsWrapper = document.createElement('div');
+    buttonsWrapper.style.cssText = `
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    `;
+
+    const botaoCancelar = document.createElement('button');
+    botaoCancelar.textContent = 'Cancelar';
+    botaoCancelar.style.cssText = `
+      background: #e2e8f0;
+      color: #334155;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    `;
+
+    const botaoConfirmar = document.createElement('button');
+    botaoConfirmar.textContent = 'Confirmar';
+    botaoConfirmar.style.cssText = `
+      background: #1e40af;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    `;
+
+    botaoCancelar.onclick = () => {
+      document.body.removeChild(overlay);
+      resolve(false);
+    };
+    botaoConfirmar.onclick = () => {
+      document.body.removeChild(overlay);
+      resolve(true);
+    };
+
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        document.body.removeChild(overlay);
+        resolve(false);
+      }
+    };
+
+    buttonsWrapper.appendChild(botaoCancelar);
+    buttonsWrapper.appendChild(botaoConfirmar);
+    modal.appendChild(mensagem);
+    modal.appendChild(buttonsWrapper);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
   });
@@ -499,16 +622,35 @@ function carregarEventos(filtro = "all") {
       const favoritos = obterFavoritos();
       let eventosFiltrados;
 
+      const ehAdmin = getAuthRole() === "ADMIN";
+      const agora = new Date();
+      const eventosVisiveis = eventos.filter((evento) => {
+        if (ehAdmin) {
+          return true;
+        }
+        const horaFim = new Date(evento.horaFim);
+        return isNaN(horaFim.getTime()) || horaFim >= agora;
+      });
+
       if (filtro === "all") {
-        eventosFiltrados = eventos;
+        eventosFiltrados = eventosVisiveis;
       } else if (filtro === "favoritos") {
-        eventosFiltrados = eventos.filter((evento) =>
+        eventosFiltrados = eventosVisiveis.filter((evento) =>
           favoritos.includes(evento.id)
         );
       } else {
-        eventosFiltrados = eventos.filter(
+        eventosFiltrados = eventosVisiveis.filter(
           (evento) => evento.tipoEvento === filtro
         );
+      }
+
+      if (eventosFiltrados.length === 0) {
+        eventsList.innerHTML = `
+          <div class="events-empty-message">
+            <p>Não há eventos disponíveis para exibir no momento.</p>
+          </div>
+        `;
+        return;
       }
 
       eventosFiltrados.forEach((evento) => {
@@ -591,33 +733,35 @@ function inscreverEvento(eventoId, botao) {
 /**
  * Excluir evento
  */
-function excluirEvento(eventoId) {
-  if (confirm("Tem certeza que deseja excluir este evento?")) {
-    fetch(`https://portal-sale.onrender.com/eventos/${eventoId}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
+async function excluirEvento(eventoId) {
+  const confirmado = await mostrarModalConfirmacao("Tem certeza que deseja excluir este evento?");
+  if (!confirmado) return;
+
+  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  })
+    .then((response) => {
+      if (response.ok) {
+        mostrarModalMensagem("Evento excluído com sucesso!", "sucesso");
+
+        let favoritos = obterFavoritos();
+        favoritos = favoritos.filter((id) => id !== eventoId);
+        salvarEventos(favoritos);
+
+        const filtroAtivo =
+          document.querySelector(".filter-button.active").dataset.filter;
+        carregarEventos(filtroAtivo);
+      } else {
+        throw new Error(`Erro ao excluir evento: ${response.status}`);
+      }
     })
-      .then((response) => {
-        if (response.ok) {
-          mostrarModalMensagem("Evento excluído com sucesso!", "sucesso");
-
-          let favoritos = obterFavoritos();
-          favoritos = favoritos.filter((id) => id !== eventoId);
-          salvarEventos(favoritos);
-
-          const filtroAtivo =
-            document.querySelector(".filter-button.active").dataset.filter;
-          carregarEventos(filtroAtivo);
-        } else {
-          throw new Error(`Erro ao excluir evento: ${response.status}`);
-        }
-      })
-      .catch((error) => {
-        console.error("Erro ao excluir evento:", error);
-        mostrarModalMensagem("Erro ao excluir o evento.", "erro");
-      });
-  }
+    .catch((error) => {
+      console.error("Erro ao excluir evento:", error);
+      mostrarModalMensagem("Erro ao excluir o evento.", "erro");
+    });
 }
+
 
 // Botão voltar
 document.addEventListener("DOMContentLoaded", () => {

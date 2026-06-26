@@ -34,7 +34,7 @@ function getAuthToken() {
   try {
     const nameData = JSON.parse(window.name || "{}");
     if (nameData?.token) {
-      saveAuthToken(nameData.token);
+      saveAuthData(nameData.token, nameData.role || localStorage.getItem("role") || sessionStorage.getItem("role") || "ADMIN");
       return nameData.token;
     }
   } catch (error) {
@@ -56,9 +56,12 @@ function clearAuthToken() {
   }
 }
 
-function getAuthHeaders(contentType = "application/json") {
+function getAuthHeaders(contentType) {
   const token = getAuthToken();
-  const headers = { "Content-Type": contentType };
+  const headers = {};
+  if (contentType) {
+    headers["Content-Type"] = contentType;
+  }
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -200,6 +203,103 @@ function mostrarModalMensagem(msg, tipo = "info") {
   });
 }
 
+function mostrarModalConfirmacao(msg = "Tem certeza?") {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      font-family: Arial, sans-serif;
+    `;
+
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      background: white;
+      padding: 28px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      position: relative;
+      z-index: 10001;
+    `;
+
+    const mensagem = document.createElement('p');
+    mensagem.textContent = msg;
+    mensagem.style.cssText = `
+      color: #333;
+      font-size: 16px;
+      margin: 0 0 24px 0;
+      line-height: 1.6;
+    `;
+
+    const botoes = document.createElement('div');
+    botoes.style.cssText = `
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    `;
+
+    const botaoCancelar = document.createElement('button');
+    botaoCancelar.textContent = 'Cancelar';
+    botaoCancelar.style.cssText = `
+      background: #e2e8f0;
+      color: #334155;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    `;
+
+    const botaoConfirmar = document.createElement('button');
+    botaoConfirmar.textContent = 'Confirmar';
+    botaoConfirmar.style.cssText = `
+      background: #1e40af;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    `;
+
+    botaoCancelar.onclick = () => {
+      document.body.removeChild(overlay);
+      resolve(false);
+    };
+
+    botaoConfirmar.onclick = () => {
+      document.body.removeChild(overlay);
+      resolve(true);
+    };
+
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        document.body.removeChild(overlay);
+        resolve(false);
+      }
+    };
+
+    botoes.appendChild(botaoCancelar);
+    botoes.appendChild(botaoConfirmar);
+    modal.appendChild(mensagem);
+    modal.appendChild(botoes);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const eventosList = document.getElementById("eventosList");
   const usuariosList = document.getElementById("usuariosList");
@@ -232,9 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function carregarEventos() {
-  fetch("https://portal-sale.onrender.com/eventos", {
-    headers: getAuthHeaders()
-  })
+  fetch("https://portal-sale.onrender.com/eventos")
     .then(res => res.json())
     .then(eventos => {
       const eventosList = document.getElementById("eventosList");
@@ -257,9 +355,7 @@ function carregarEventos() {
 }
 
 function mostrarDetalhes(id) {
-  fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
-    headers: getAuthHeaders()
-  })
+  fetch(`https://portal-sale.onrender.com/eventos/${id}`)
     .then(res => res.json())
     .then(evento => {
       const usuariosList = document.getElementById("usuariosList");
@@ -285,9 +381,7 @@ function mostrarDetalhes(id) {
 }
 
 function editarEvento(id) {
-  fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
-    headers: getAuthHeaders()
-  })
+  fetch(`https://portal-sale.onrender.com/eventos/${id}`)
     .then(res => res.json())
     .then(evento => {
       const usuariosList = document.getElementById("usuariosList");
@@ -350,47 +444,58 @@ function editarEvento(id) {
             return res.json();
           })
           .then(() => {
-            alert("Evento atualizado com sucesso!");
+            mostrarModalMensagem("Evento atualizado com sucesso!", "sucesso");
             carregarEventos();
           })
           .catch(err => {
             console.error("Erro ao atualizar:", err);
-            alert("Falha ao atualizar evento.");
+            mostrarModalMensagem("Falha ao atualizar evento.", "erro");
           });
       });
     })
     .catch(err => {
       console.error("Erro ao carregar evento para edição:", err);
-      alert("Erro ao carregar evento para edição.");
+      mostrarModalMensagem("Erro ao carregar evento para edição.", "erro");
     });
 }
 
 function verInscritos(eventoId) {
-  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}/inscritos`, {
-    headers: getAuthHeaders()
-  })
-    .then(res => res.json())
-    .then(lista => {
-      const usuariosList = document.getElementById("usuariosList");
+  const usuariosList = document.getElementById("usuariosList");
+  usuariosList.innerHTML = `<p>Carregando inscritos...</p>`;
 
-      if (!lista || lista.length === 0) {
+  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}/inscritos`)
+    .then(res => {
+      if (!res.ok) throw new Error(`Inscritos não encontrados: ${res.status}`);
+      return res.json();
+    })
+    .then(inscritos => {
+      if (!inscritos || inscritos.length === 0) {
         usuariosList.innerHTML = "<p>Nenhum inscrito neste evento.</p>";
         return;
       }
 
+      const eventoNome = inscritos[0]?.eventoNome || "Evento";
       usuariosList.innerHTML = `
         <h3>Usuários Inscritos</h3>
-        ${lista.map(u => `<p>${u.nome} (${u.ra})</p>`).join("")}
+        <p><strong>Evento:</strong> ${eventoNome}</p>
+        <p><strong>Total de inscritos:</strong> ${inscritos.length}</p>
+        <div class="inscritos-list">
+          ${inscritos.map(u => {
+            return `<div class="inscrito-item"><strong>${u.nome}</strong> (${u.ra}) - <span class="inscrito-status ${u.presencaConfirmada ? 'status-confirmado' : 'status-nao-confirmado'}">${u.presencaConfirmada ? 'Presença confirmada' : 'Presença não confirmada'}</span></div>`;
+          }).join("")}
+        </div>
       `;
     })
     .catch(err => {
       console.error("Erro ao buscar inscritos:", err);
-      alert("Erro ao buscar inscritos.");
+      mostrarModalMensagem("Erro ao buscar inscritos.", "erro");
+      usuariosList.innerHTML = "<p>Não foi possível carregar os inscritos.</p>";
     });
 }
 
-function excluirEvento(id) {
-  if (!confirm("Tem certeza que deseja excluir este evento?")) return;
+async function excluirEvento(id) {
+  const confirmado = await mostrarModalConfirmacao("Tem certeza que deseja excluir este evento?");
+  if (!confirmado) return;
 
   fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
     method: "DELETE",
@@ -398,11 +503,11 @@ function excluirEvento(id) {
   })
     .then(res => {
       if (!res.ok) throw new Error("Erro ao excluir");
-      alert("Evento excluído.");
+      mostrarModalMensagem("Evento excluído.", "sucesso");
       carregarEventos();
     })
     .catch(err => {
       console.error("Erro ao excluir:", err);
-      alert("Falha ao excluir evento.");
+      mostrarModalMensagem("Falha ao excluir evento.", "erro");
     })
 }
