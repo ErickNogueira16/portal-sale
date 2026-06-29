@@ -58,7 +58,7 @@ function addTokenToUrl(url) {
 }
 
 function redirectToLogin() {
-  window.location.href = addTokenToUrl("../login/index.html");
+  window.location.href = addTokenToUrl("/Front/login/index.html");
 }
 
 function getApiBaseUrl() {
@@ -143,7 +143,7 @@ function carregarHistorico() {
 
 backButton.addEventListener("click", () => {
   // Volta para index.html, que vai validar o token e exibir o painel se válido
-  window.location.href = addTokenToUrl("../login/index.html");
+  window.location.href = addTokenToUrl("/Front/login/index.html");
 });
 
 window.addEventListener("DOMContentLoaded", carregarHistorico);

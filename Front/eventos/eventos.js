@@ -103,7 +103,7 @@ function getAuthHeaders(contentType = "application/json") {
 
 function redirectIfNotAuthenticated() {
   if (!getAuthToken()) {
-    window.location.href = "../login/index.html";
+    window.location.href = "/Front/login/index.html";
     return true;
   }
   return false;
@@ -798,7 +798,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (backButton) {
     backButton.addEventListener("click", () => {
       // Volta para index.html, que vai exibir o painel principal se o token for válido
-      window.location.href = "../login/index.html";
+      window.location.href = "/Front/login/index.html";
     });
   }
 });

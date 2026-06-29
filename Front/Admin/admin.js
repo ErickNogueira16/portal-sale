@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!token || role !== "ADMIN") {
     mostrarModalMensagem("Acesso negado. Faça login como administrador.", "erro");
     setTimeout(() => {
-      window.location.href = "../login/index.html";
+      window.location.href = "/Front/login/index.html";
     }, 2000);
     return;
   }
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutButton.addEventListener("click", () => {
     localStorage.removeItem("usuarioLogado");
     clearAuthToken();
-    window.location.href = "../login/index.html";
+    window.location.href = "/Front/login/index.html";
   });
 
   carregarEventos();
@@ -330,7 +330,7 @@ document.addEventListener("DOMContentLoaded", () => {
   exportReportButton.addEventListener("click", gerarRelatorioEventos);
 
   criarEventoButton.addEventListener("click", () => {
-    window.location.href = "../cadastro/cadastro.html#dashboard";
+    window.location.href = "/Front/cadastro/cadastro.html#dashboard";
   });
 });
 
