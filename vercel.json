@@ -12,6 +12,7 @@
     { "src": "/historico", "dest": "/historico/historico.html" },
     { "src": "/cadastro", "dest": "/cadastro/cadastro.html" },
     { "src": "/cadastroUsuarios", "dest": "/cadastroUsuarios/CadastroUsuarios.html" },
+    { "src": "/cadastroUsuarios/(.*)", "dest": "/cadastroUsuarios/$1" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
