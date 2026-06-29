@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!token || role !== "ADMIN") {
     mostrarModalMensagem("Acesso negado. Faça login como administrador.", "erro");
     setTimeout(() => {
-      window.location.href = "../login/login.html";
+      window.location.href = "../login/index.html";
     }, 2000);
     return;
   }
@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutButton.addEventListener("click", () => {
     localStorage.removeItem("usuarioLogado");
     clearAuthToken();
-    window.location.href = "../login/login.html";
+    window.location.href = "../login/index.html";
   });
 
   carregarEventos();

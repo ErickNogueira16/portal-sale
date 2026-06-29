@@ -97,7 +97,7 @@ function getApiBaseUrl() {
 
 function logout() {
   clearAuthToken();
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
 function addTokenToUrl(url) {

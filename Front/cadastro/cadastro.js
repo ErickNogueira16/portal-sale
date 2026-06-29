@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!token || role !== "ADMIN") {
     mostrarModalMensagem("Acesso negado! Apenas administradores podem cadastrar eventos.", "erro");
     setTimeout(() => {
-      window.location.href = "../login/login.html";
+      window.location.href = "../login/index.html";
     }, 2000);
     return;
   }
