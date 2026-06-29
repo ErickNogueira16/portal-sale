@@ -4,14 +4,8 @@
     { "src": "Front/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/$", "dest": "/Front/login/login.html" },
-    { "src": "/(.*)", "dest": "/Front/$1" }
-  ],
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/login/login.html"
-    }
+    { "src": "/", "dest": "/login/login.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
  
