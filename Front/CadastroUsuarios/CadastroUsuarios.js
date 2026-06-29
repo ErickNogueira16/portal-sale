@@ -169,5 +169,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function voltarParaInicio() {
-    window.location.href = "/Front/login/index.html";
+    window.location.href = "../login/index.html";
 }

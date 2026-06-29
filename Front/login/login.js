@@ -144,7 +144,7 @@ function validarLogin() {
       saveAuthData(usuario.token, usuario.role);
 
       if (usuario.role === "ADMIN") {
-        window.location.href = "/Front/admin/admin.html";
+        window.location.href = "../admin/admin.html";
       } else {
         mostrarPainelPrincipal();
         carregarCalendarioEventos();
@@ -398,15 +398,15 @@ function carregarCalendarioEventos() {
 
 // Redirecionamentos do painel
 function redirecionarParaEventos() {
-  window.location.href = addTokenToUrl("/Front/eventos/eventos_novo.html#dashboard");
+  window.location.href = addTokenToUrl("../eventos/eventos_novo.html#dashboard");
 }
 
 function redirecionarParaHistorico() {
-  window.location.href = addTokenToUrl("/Front/historico/historico.html");
+  window.location.href = addTokenToUrl("../historico/historico.html");
 }
 
 function redirecionarParaMarcarEventos() {
-  window.location.href = addTokenToUrl("/Front/cadastro/cadastro.html#dashboard");
+  window.location.href = addTokenToUrl("../cadastro/cadastro.html#dashboard");
 }
 
 function atualizarEstatisticas() {
@@ -464,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(data => {
       // Token válido
       if (role === "ADMIN") {
-        window.location.href = "/Front/admin/admin.html";
+        window.location.href = "../admin/admin.html";
         return;
       }
       // Mostra o painel principal com o calendário e estatísticas
