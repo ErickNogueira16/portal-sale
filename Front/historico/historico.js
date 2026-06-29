@@ -58,7 +58,7 @@ function addTokenToUrl(url) {
 }
 
 function redirectToLogin() {
-  window.location.href = addTokenToUrl("../login/index.html");
+  window.location.href = addTokenToUrl("/login/");
 }
 
 function getApiBaseUrl() {
@@ -142,7 +142,7 @@ function carregarHistorico() {
 }
 
 backButton.addEventListener("click", () => {
-  window.location.href = addTokenToUrl("../login/index.html");
+  window.location.href = addTokenToUrl("/login/");
 });
 
 window.addEventListener("DOMContentLoaded", carregarHistorico);

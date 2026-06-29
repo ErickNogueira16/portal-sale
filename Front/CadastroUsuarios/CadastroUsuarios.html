@@ -5,15 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - Portal Salê</title>
-    <script src="/cadastroUsuarios/CadastroUsuarios.js"></script>
-    <link rel="stylesheet" href="/login/login.css"> <!-- Reutiliza o CSS do login -->
-    <script src="/api-config.js"></script>
+    <script src="./CadastroUsuarios.js"></script>
+    <link rel="stylesheet" href="../login/login.css"> <!-- Reutiliza o CSS do login -->
+    <script src="../api-config.js"></script>
 </head>
 
 <body>
     <div class="header">
         <div class="header__logo">
-            <img class="header__logo-image" src="/imagens/portalsale.png" alt="Logo Salesiano">
+            <img class="header__logo-image" src="../imagens/portalsale.png" alt="Logo Salesiano">
             <h1 class="header__logo-title">Portal Salê</h1>
         </div>
     </div>
@@ -27,7 +27,7 @@
             <input type="password" id="senha" class="login__input" placeholder="Senha" required>
             <input type="password" id="confirmarSenha" class="login__input" placeholder="Confirmar Senha" required>
             <button type="submit" class="login__button" id="cadastrarButton">Cadastrar</button>
-            <div class="login__forgot-password" onclick="window.location.href='/login/index.html'">Já tem conta? Faça
+            <div class="login__forgot-password" onclick="window.location.href='../login/index.html'">Já tem conta? Faça
                 login</div>
         </form>
     </div>

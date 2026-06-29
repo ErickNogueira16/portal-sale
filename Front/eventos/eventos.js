@@ -103,7 +103,7 @@ function getAuthHeaders(contentType = "application/json") {
 
 function redirectIfNotAuthenticated() {
   if (!getAuthToken()) {
-    window.location.href = "../login/index.html";
+    window.location.href = "/login/";
     return true;
   }
   return false;
@@ -797,7 +797,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const backButton = document.getElementById("backButton");
   if (backButton) {
     backButton.addEventListener("click", () => {
-      window.location.href = "../login/index.html";
+      window.location.href = "/login/";
     });
   }
 });
