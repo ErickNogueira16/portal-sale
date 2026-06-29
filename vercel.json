@@ -4,16 +4,15 @@
     { "src": "Front/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/", "dest": "/Front/login/index.html" },
-    { "src": "/login", "dest": "/Front/login/index.html" },
-    { "src": "/login/", "dest": "/Front/login/index.html" },
-    { "src": "/admin", "dest": "/Front/admin/admin.html" },
-    { "src": "/eventos", "dest": "/Front/eventos/eventos_novo.html" },
-    { "src": "/historico", "dest": "/Front/historico/historico.html" },
-    { "src": "/cadastro", "dest": "/Front/cadastro/cadastro.html" },
-    { "src": "/cadastroUsuarios", "dest": "/Front/cadastroUsuarios/CadastroUsuarios.html" },
-    { "src": "/Front/(.*)", "dest": "/Front/$1" },
-    { "src": "/(.*)", "dest": "/Front/$1" }
+    { "src": "/", "dest": "/login/index.html" },
+    { "src": "/login", "dest": "/login/index.html" },
+    { "src": "/login/", "dest": "/login/index.html" },
+    { "src": "/admin", "dest": "/admin/admin.html" },
+    { "src": "/eventos", "dest": "/eventos/eventos_novo.html" },
+    { "src": "/historico", "dest": "/historico/historico.html" },
+    { "src": "/cadastro", "dest": "/cadastro/cadastro.html" },
+    { "src": "/cadastroUsuarios", "dest": "/cadastroUsuarios/CadastroUsuarios.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
  
