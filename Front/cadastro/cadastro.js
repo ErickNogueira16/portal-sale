@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const backButton = document.getElementById("backButton");
   if (backButton) {
     backButton.addEventListener("click", () => {
-      window.location.href = "/admin/admin.html";
+      window.location.href = "/Admin/Admin.html";
     });
   }
 });
