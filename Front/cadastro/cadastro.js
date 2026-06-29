@@ -53,6 +53,10 @@ function getAuthHeaders(contentType = "application/json") {
   return headers;
 }
 
+function getApiBaseUrl() {
+  return window.API_BASE || "https://portal-sale.onrender.com";
+}
+
 function getAuthRole() {
   const roleFromLocalStorage = localStorage.getItem("role");
   if (roleFromLocalStorage) return roleFromLocalStorage;
@@ -218,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Dados enviados:", evento);
 
-    fetch("https://portal-sale.onrender.com/eventos", {
+    fetch(`${getApiBaseUrl()}/eventos`, {
       method: "POST",
       headers: {
         "Accept": "application/json",
@@ -250,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const backButton = document.getElementById("backButton");
   if (backButton) {
     backButton.addEventListener("click", () => {
-      window.location.href = "../Admin/admin.html";
+      window.location.href = "../admin/admin.html";
     });
   }
 });

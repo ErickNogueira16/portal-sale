@@ -326,13 +326,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
   carregarEventos();
 
+  const exportReportButton = document.getElementById("exportReportButton");
+  exportReportButton.addEventListener("click", gerarRelatorioEventos);
+
   criarEventoButton.addEventListener("click", () => {
     window.location.href = "../cadastro/cadastro.html#dashboard";
   });
 });
 
+function getApiBaseUrl() {
+  return window.API_BASE || "https://portal-sale.onrender.com";
+}
+
+function escapeCSV(value) {
+  if (value == null) return "";
+  const text = String(value);
+  const escaped = text.replace(/"/g, '""');
+  return `"${escaped}"`;
+}
+
+async function gerarRelatorioEventos() {
+  try {
+    if (typeof XLSX === 'undefined') {
+      throw new Error('Biblioteca XLSX não carregada.');
+    }
+
+    const baseUrl = getApiBaseUrl();
+    const eventosResponse = await fetch(`${baseUrl}/eventos`);
+    if (!eventosResponse.ok) throw new Error('Não foi possível obter a lista de eventos.');
+    const eventos = await eventosResponse.json();
+
+    const rows = [
+      [
+        'Evento ID',
+        'Evento Nome',
+        'Data Hora Início',
+        'Hora Fim',
+        'Local',
+        'Tipo de Evento',
+        'Inscrição ID',
+        'Usuário ID',
+        'Nome do Usuário',
+        'RA',
+        'Presença Confirmada',
+        'Data da Inscrição'
+      ]
+    ];
+
+    await Promise.all(eventos.map(async (evento) => {
+      const inscritosResponse = await fetch(`${baseUrl}/eventos/${evento.id}/inscritos`);
+      if (!inscritosResponse.ok) throw new Error(`Falha ao buscar inscritos para evento ${evento.id}`);
+      const inscritos = await inscritosResponse.json();
+
+      if (!inscritos || inscritos.length === 0) {
+        rows.push([
+          evento.id || '',
+          evento.nome || '',
+          evento.dataHora || '',
+          evento.horaFim || '',
+          evento.local || '',
+          evento.tipoEvento || '',
+          '',
+          '',
+          '',
+          '',
+          'Nenhum inscrito',
+          ''
+        ]);
+        return;
+      }
+
+      inscritos.forEach(inscrito => {
+        rows.push([
+          evento.id || '',
+          evento.nome || '',
+          evento.dataHora || '',
+          evento.horaFim || '',
+          evento.local || '',
+          evento.tipoEvento || '',
+          inscrito.id || '',
+          inscrito.usuarioId || '',
+          inscrito.nome || '',
+          inscrito.ra || '',
+          inscrito.presencaConfirmada ? 'Sim' : 'Não',
+          inscrito.dataHoraInscricao || ''
+        ]);
+      });
+    }));
+
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório');
+    XLSX.writeFile(workbook, 'relatorio-eventos.xlsx');
+
+    mostrarModalMensagem('O relatório foi gerado e será baixado em seguida.', 'sucesso');
+  } catch (error) {
+    console.error('Erro ao gerar relatório:', error);
+    mostrarModalMensagem('Erro ao gerar relatório de eventos.', 'erro');
+  }
+}
+
 function carregarEventos() {
-  fetch("https://portal-sale.onrender.com/eventos")
+  const apiBase = getApiBaseUrl();
+  fetch(`${apiBase}/eventos`)
     .then(res => res.json())
     .then(eventos => {
       const eventosList = document.getElementById("eventosList");
@@ -354,34 +450,42 @@ function carregarEventos() {
     });
 }
 
-function mostrarDetalhes(id) {
-  fetch(`https://portal-sale.onrender.com/eventos/${id}`)
-    .then(res => res.json())
-    .then(evento => {
-      const usuariosList = document.getElementById("usuariosList");
+async function mostrarDetalhes(id) {
+  try {
+    const apiBase = getApiBaseUrl();
+    const [eventoResponse, inscritosResponse] = await Promise.all([
+      fetch(`${apiBase}/eventos/${id}`),
+      fetch(`${apiBase}/eventos/${id}/inscritos`)
+    ]);
 
-      const inscritosCount = evento.inscritos ? evento.inscritos.length : 0;
+    if (!eventoResponse.ok) throw new Error('Evento não encontrado.');
+    if (!inscritosResponse.ok) throw new Error('Não foi possível obter inscritos para o evento.');
 
-      usuariosList.innerHTML = `
-        <h3>Detalhes do Evento</h3>
-        <p><strong>Nome:</strong> ${evento.nome}</p>
-        <p><strong>Palestrante:</strong> ${evento.palestrante}</p>
-        <p><strong>Descrição:</strong> ${evento.descricao}</p>
-        <p><strong>Data de Início:</strong> ${formatarDataHora(evento.dataHora)}</p>
-        <p><strong>Hora de Fim:</strong> ${formatarDataHora(evento.horaFim)}</p>
-        <p><strong>Local:</strong> ${evento.local}</p>
-        <p><strong>Vagas:</strong> ${evento.vagas}</p>
-        <p><strong>Inscritos:</strong> ${inscritosCount}</p>
-      `;
-    })
-    .catch(err => {
-      console.error("Erro ao exibir detalhes:", err);
-      mostrarModalMensagem("Erro ao exibir detalhes.", "erro");
-    });
+    const evento = await eventoResponse.json();
+    const inscritos = await inscritosResponse.json();
+    const inscritosCount = Array.isArray(inscritos) ? inscritos.length : 0;
+
+    const usuariosList = document.getElementById("usuariosList");
+    usuariosList.innerHTML = `
+      <h3>Detalhes do Evento</h3>
+      <p><strong>Nome:</strong> ${evento.nome}</p>
+      <p><strong>Palestrante:</strong> ${evento.palestrante}</p>
+      <p><strong>Descrição:</strong> ${evento.descricao}</p>
+      <p><strong>Data de Início:</strong> ${formatarDataHora(evento.dataHora)}</p>
+      <p><strong>Hora de Fim:</strong> ${formatarDataHora(evento.horaFim)}</p>
+      <p><strong>Local:</strong> ${evento.local}</p>
+      <p><strong>Vagas:</strong> ${evento.vagas}</p>
+      <p><strong>Inscritos:</strong> ${inscritosCount}</p>
+    `;
+  } catch (err) {
+    console.error("Erro ao exibir detalhes:", err);
+    mostrarModalMensagem("Erro ao exibir detalhes.", "erro");
+  }
 }
 
 function editarEvento(id) {
-  fetch(`https://portal-sale.onrender.com/eventos/${id}`)
+  const apiBase = getApiBaseUrl();
+  fetch(`${apiBase}/eventos/${id}`)
     .then(res => res.json())
     .then(evento => {
       const usuariosList = document.getElementById("usuariosList");
@@ -434,13 +538,16 @@ function editarEvento(id) {
           tipoEvento: document.getElementById("editTipoEvento").value
         };
 
-        fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
+        fetch(`${getApiBaseUrl()}/eventos/${id}`, {
           method: "PUT",
-          headers: getAuthHeaders(),
+          headers: getAuthHeaders("application/json"),
           body: JSON.stringify(objAtualizado)
         })
-          .then(res => {
-            if (!res.ok) throw new Error("Erro ao atualizar evento");
+          .then(async res => {
+            if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(errorText || `Erro ao atualizar evento (${res.status})`);
+            }
             return res.json();
           })
           .then(() => {
@@ -463,7 +570,7 @@ function verInscritos(eventoId) {
   const usuariosList = document.getElementById("usuariosList");
   usuariosList.innerHTML = `<p>Carregando inscritos...</p>`;
 
-  fetch(`https://portal-sale.onrender.com/eventos/${eventoId}/inscritos`)
+  fetch(`${getApiBaseUrl()}/eventos/${eventoId}/inscritos`)
     .then(res => {
       if (!res.ok) throw new Error(`Inscritos não encontrados: ${res.status}`);
       return res.json();
@@ -497,7 +604,7 @@ async function excluirEvento(id) {
   const confirmado = await mostrarModalConfirmacao("Tem certeza que deseja excluir este evento?");
   if (!confirmado) return;
 
-  fetch(`https://portal-sale.onrender.com/eventos/${id}`, {
+  fetch(`${getApiBaseUrl()}/eventos/${id}`, {
     method: "DELETE",
     headers: getAuthHeaders()
   })

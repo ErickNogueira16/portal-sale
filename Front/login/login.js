@@ -91,6 +91,10 @@ function clearAuthToken() {
   }
 }
 
+function getApiBaseUrl() {
+  return window.API_BASE || "https://portal-sale.onrender.com";
+}
+
 function logout() {
   clearAuthToken();
   window.location.href = "login.html";
@@ -121,7 +125,7 @@ function validarLogin() {
     return;
   }
 
-    fetch("https://portal-sale.onrender.com/auth/login", {
+    fetch(`${getApiBaseUrl()}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ra, senha })
@@ -140,7 +144,7 @@ function validarLogin() {
       saveAuthData(usuario.token, usuario.role);
 
       if (usuario.role === "ADMIN") {
-        window.location.href = "../Admin/admin.html";
+        window.location.href = "../admin/admin.html";
       } else {
         mostrarPainelPrincipal();
         carregarCalendarioEventos();
@@ -377,7 +381,7 @@ function renderizarCalendario(eventos) {
 function carregarCalendarioEventos() {
   if (!calendarGrid || !calendarMonthYear) return;
 
-    fetch('https://portal-sale.onrender.com/eventos')
+    fetch(`${getApiBaseUrl()}/eventos`)
     .then(async res => {
       if (!res.ok) {
         const text = await res.text().catch(() => '');
@@ -408,7 +412,7 @@ function redirecionarParaMarcarEventos() {
 function atualizarEstatisticas() {
   const numeroEventosElement = document.querySelector(".stat-item__number");
 
-    fetch("https://portal-sale.onrender.com/eventos")
+    fetch(`${getApiBaseUrl()}/eventos`)
     .then(res => res.json())
     .then(eventos => {
       numeroEventosElement.textContent = eventos.length;
@@ -444,7 +448,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Se há um token, valida no servidor antes de conceder acesso
   if (token) {
-      fetch("https://portal-sale.onrender.com/auth/validate", {
+      fetch(`${getApiBaseUrl()}/auth/validate`, {
       method: "GET",
       headers: { 
         "Authorization": `Bearer ${token}`,
@@ -460,7 +464,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(data => {
       // Token válido
       if (role === "ADMIN") {
-        window.location.href = "../Admin/admin.html";
+        window.location.href = "../admin/admin.html";
         return;
       }
       // Mostra o painel principal com o calendário e estatísticas

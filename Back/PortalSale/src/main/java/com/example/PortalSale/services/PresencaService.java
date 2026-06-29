@@ -14,6 +14,7 @@ import com.example.PortalSale.repository.InscricaoEventoRepository;
 import com.example.PortalSale.repository.PresencaEventoRepository;
 import com.example.PortalSale.repository.UsuarioRepository;
 import java.security.SecureRandom;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,19 +36,22 @@ public class PresencaService {
     private final EventoRepository eventoRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Clock clock;
 
     public PresencaService(PresencaEventoRepository presencaEventoRepository,
                           CodigoValidacaoRepository codigoValidacaoRepository,
                           InscricaoEventoRepository inscricaoEventoRepository,
                           EventoRepository eventoRepository,
                           UsuarioRepository usuarioRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          Clock clock) {
         this.presencaEventoRepository = presencaEventoRepository;
         this.codigoValidacaoRepository = codigoValidacaoRepository;
         this.inscricaoEventoRepository = inscricaoEventoRepository;
         this.eventoRepository = eventoRepository;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.clock = clock;
     }
 
     @Transactional
@@ -108,7 +112,7 @@ public class PresencaService {
 
         PresencaEvento presenca = new PresencaEvento();
         presenca.setInscricaoEvento(inscricao);
-        presenca.setDataHoraCheckin(LocalDateTime.now());
+        presenca.setDataHoraCheckin(LocalDateTime.now(clock));
         presenca.setIpRequisicao(ipRequisicao);
         presenca.setUserAgent(userAgent);
         presenca.setGeolocalizacao(formatCoords(latitude, longitude));
@@ -139,7 +143,7 @@ public class PresencaService {
 
         CodigoValidacao validacao = validarCodigo(eventoId, usuarioId, inscricao.getUsuario().getEmail(), TipoValidacao.CHECKOUT, codigo);
 
-        presenca.setDataHoraCheckout(LocalDateTime.now());
+        presenca.setDataHoraCheckout(LocalDateTime.now(clock));
         presenca.setCodigoUsado("CHECKOUT-" + validacao.getId());
         presenca.setIpRequisicao(ipRequisicao);
         presenca.setUserAgent(userAgent);
@@ -181,8 +185,8 @@ public class PresencaService {
         validacao.setUsuario(usuario);
         validacao.setTipo(tipo);
         validacao.setCodigoHash(passwordEncoder.encode(codigo));
-        validacao.setCriadoEm(LocalDateTime.now());
-        validacao.setExpiracao(LocalDateTime.now().plusMinutes(CODIGO_EXPIRATION_MINUTES));
+        validacao.setCriadoEm(LocalDateTime.now(clock));
+        validacao.setExpiracao(LocalDateTime.now(clock).plusMinutes(CODIGO_EXPIRATION_MINUTES));
         validacao.setUsado(false);
         validacao.setTentativas(0);
         return validacao;
@@ -203,7 +207,7 @@ public class PresencaService {
                 .findFirstByUsuarioIdAndEventoIdAndTipoAndUsadoFalseOrderByCriadoEmDesc(usuarioId, eventoId, tipo)
                 .orElseThrow(() -> new IllegalArgumentException("Código de validação não encontrado ou expirado."));
 
-        if (validacao.getExpiracao() == null || validacao.getExpiracao().isBefore(LocalDateTime.now())) {
+        if (validacao.getExpiracao() == null || validacao.getExpiracao().isBefore(LocalDateTime.now(clock))) {
             throw new IllegalArgumentException("Código expirado.");
         }
 
@@ -226,7 +230,7 @@ public class PresencaService {
         if (evento.getHoraFim() == null) {
             return false;
         }
-        LocalDateTime agora = LocalDateTime.now();
+        LocalDateTime agora = LocalDateTime.now(clock);
         LocalDateTime inicioValidacao = evento.getHoraFim();
         LocalDateTime fimValidacao = evento.getHoraFim().plusHours(1);
         return !agora.isBefore(inicioValidacao) && !agora.isAfter(fimValidacao);

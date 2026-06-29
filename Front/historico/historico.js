@@ -61,6 +61,10 @@ function redirectToLogin() {
   window.location.href = addTokenToUrl("../login/login.html");
 }
 
+function getApiBaseUrl() {
+  return window.API_BASE || "https://portal-sale.onrender.com";
+}
+
 function formatarDataHora(valor) {
   if (!valor) return "N/A";
   const data = new Date(valor);
@@ -85,7 +89,7 @@ function carregarHistorico() {
     return;
   }
 
-  fetch("https://portal-sale.onrender.com/eventos/inscricoes/me", {
+  fetch(`${getApiBaseUrl()}/eventos/inscricoes/me`, {
     headers: getAuthHeaders()
   })
     .then(async response => {

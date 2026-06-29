@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <title>Painel do Administrador</title>
   <link rel="stylesheet" href="admin.css">
-  <script src="/api-config.js"></script>
+  <script src="../api-config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <header>
@@ -22,7 +23,10 @@
       <div id="usuariosList"></div>
     </section>
 
-    <button id="criarEventoButton">Criar Novo Evento</button>
+    <div class="admin-actions">
+      <button id="criarEventoButton">Criar Novo Evento</button>
+      <button id="exportReportButton">Exportar Relatório de Eventos</button>
+    </div>
   </main>
 
   <script src="admin.js"></script>

@@ -8,6 +8,7 @@ import com.example.PortalSale.models.Usuario;
 import com.example.PortalSale.repository.EventoRepository;
 import com.example.PortalSale.repository.InscricaoEventoRepository;
 import com.example.PortalSale.repository.UsuarioRepository;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -21,13 +22,16 @@ public class InscricaoService {
     private final InscricaoEventoRepository inscricaoEventoRepository;
     private final EventoRepository eventoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final Clock clock;
 
     public InscricaoService(InscricaoEventoRepository inscricaoEventoRepository,
                             EventoRepository eventoRepository,
-                            UsuarioRepository usuarioRepository) {
+                            UsuarioRepository usuarioRepository,
+                            Clock clock) {
         this.inscricaoEventoRepository = inscricaoEventoRepository;
         this.eventoRepository = eventoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.clock = clock;
     }
 
     @Transactional
@@ -38,9 +42,13 @@ public class InscricaoService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
-        // Validar se o evento já começou
-        if (LocalDateTime.now().isAfter(evento.getDataHora())) {
-            throw new IllegalStateException("Inscrições para este evento já foram encerradas.");
+        // Inscrições permitidas apenas até o horário de início do evento
+        if (evento.getDataHora() == null) {
+            throw new IllegalStateException("Evento não possui data de início definida.");
+        }
+        LocalDateTime agora = LocalDateTime.now(clock);
+        if (!agora.isBefore(evento.getDataHora())) {
+            throw new IllegalStateException("Inscrições para este evento já foram encerradas porque o evento já começou.");
         }
 
         if (inscricaoEventoRepository.existsByUsuarioIdAndEventoIdAndStatus(usuarioId, eventoId, StatusInscricao.INSCRITO)) {
@@ -59,7 +67,7 @@ public class InscricaoService {
         InscricaoEvento inscricao = new InscricaoEvento();
         inscricao.setEvento(evento);
         inscricao.setUsuario(usuario);
-        inscricao.setDataHoraInscricao(LocalDateTime.now());
+        inscricao.setDataHoraInscricao(LocalDateTime.now(clock));
         inscricao.setStatus(StatusInscricao.INSCRITO);
 
         return inscricaoEventoRepository.save(inscricao);

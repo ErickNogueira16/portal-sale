@@ -98,6 +98,10 @@ function mostrarModalMensagem(msg, tipo = "info") {
   });
 }
 
+function getApiBaseUrl() {
+    return window.API_BASE || "https://portal-sale.onrender.com";
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     const formCadastro = document.querySelector("#formCadastroUsuario");
     const backButton = document.querySelector("#backButton");
@@ -139,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log("Cadastro feito:", evento);
 
-        fetch("https://portal-sale.onrender.com/auth/cadastro", {
+        fetch(`${getApiBaseUrl()}/auth/cadastro`, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
